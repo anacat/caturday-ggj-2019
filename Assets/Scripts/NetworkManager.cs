@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
+using System.Collections.Concurrent;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -34,7 +35,7 @@ public class NetworkManager : MonoBehaviour
     private int _tcpPort;
     private bool _tcpServerIsRunning;
     [HideInInspector]
-    public List<NetworkClient> NetworkClientList;
+    public ConcurrentBag<NetworkClient> NetworkClientList;
     public TcpClient TcpNetworkClient;
     public NetworkStream TcpNetworkClientStream;
     private Guid _ownGuid;
@@ -47,7 +48,7 @@ public class NetworkManager : MonoBehaviour
         _broadcastPort = 13947;
         _tcpPort = 13948;
         _broadcastList = new List<NetworkServer>();
-        NetworkClientList = new List<NetworkClient>();
+        NetworkClientList = new ConcurrentBag<NetworkClient>();
     }
 
     public virtual void Update()
@@ -263,10 +264,10 @@ public class NetworkManager : MonoBehaviour
 
     public async Task SendTcpClientMessageToAll(TcpNetworkMessage tcpNetworkMessage)
     {
-        for(int x = 0; x < NetworkClientList.Count; x++)
+        foreach (NetworkClient c in NetworkClientList)
         {
             byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
-            await NetworkClientList[x].NetworkStream.WriteAsync(bytesToSend, 0, bytesToSend.Length);
+            await c.NetworkStream.WriteAsync(bytesToSend, 0, bytesToSend.Length);
         }
     }
     #endregion
