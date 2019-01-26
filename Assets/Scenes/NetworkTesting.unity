@@ -1807,6 +1807,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 736243c3f86329546b95fa2c0189aa6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ParentMenu: {fileID: 0}
+  MenuItem: {fileID: 0}
 --- !u!1 &1204636975
 GameObject:
   m_ObjectHideFlags: 0
@@ -3434,7 +3436,7 @@ PrefabInstance:
     - target: {fileID: 5102962368447948983, guid: aefa025edd9480d4398dc38b28bfcbea,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 179
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: 5102962368447948983, guid: aefa025edd9480d4398dc38b28bfcbea,
         type: 3}

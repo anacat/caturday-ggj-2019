@@ -30,8 +30,7 @@ public class GameManager : MonoBehaviour
     
     private IEnumerator InitializeNetwork()
     {
-        NetworkManager.InitializeBroadcast();
-        //NetworkManager.SetBroadcasting(true);
+        //NetworkManager.StartBroadcasting();
         yield return null;
     }
 }
