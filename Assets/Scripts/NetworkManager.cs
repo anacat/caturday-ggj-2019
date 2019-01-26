@@ -8,6 +8,7 @@ using UnityEngine;
 
 public class NetworkManager : MonoBehaviour
 {
+    #region Broadcast
     private UdpClient _udpBroadcaster;
     private IPEndPoint _broadcastIpEndPoint;
     private bool _isBroadcasting;
@@ -61,4 +62,5 @@ public class NetworkManager : MonoBehaviour
     {
         _isBroadcasting = value;
     }
+    #endregion
 }
