@@ -41,12 +41,14 @@ public class NetworkManager : MonoBehaviour
     private Guid _ownGuid;
     private bool _tcpClientIsRunning;
     public readonly static Queue<Action> ExecuteOnMainThread = new Queue<Action>();
+    private int _udpClientPort;
 
     private void Awake()
     {
         _ownGuid = Guid.NewGuid();
         _broadcastPort = 13947;
         _tcpPort = 13948;
+        _udpClientPort = 13949;
         _broadcastList = new List<NetworkServer>();
         NetworkClientList = new ConcurrentBag<NetworkClient>();
     }
@@ -94,12 +96,12 @@ public class NetworkManager : MonoBehaviour
         return localIP;
     }
 
-    private void InitializeBroadcastServer()
+    private async void InitializeBroadcastServer()
     {
         while (_isBroadcasting)
         {
-            _udpBroadcaster.Send(_broadcastMessageBytes, _broadcastMessageBytes.Length, _broadcastIpEndPoint);
-            Thread.Sleep(1000);
+            await _udpBroadcaster.SendAsync(_broadcastMessageBytes, _broadcastMessageBytes.Length, _broadcastIpEndPoint);
+            Thread.Sleep(100);
         }
     }
 
@@ -205,9 +207,10 @@ public class NetworkManager : MonoBehaviour
                 TcpClient tcpClientTask = await _tcpListener.AcceptTcpClientAsync();
                 NetworkClient networkClient = new NetworkClient();
 
-                networkClient.Client = tcpClientTask;
+                networkClient.TcpClient = tcpClientTask;
                 networkClient.NetworkStream = tcpClientTask.GetStream();
-
+                networkClient.IpAddress = ((IPEndPoint)tcpClientTask.Client.RemoteEndPoint).Address.ToString();
+                networkClient.UdpClient = new UdpClient(networkClient.IpAddress, _udpClientPort);
                 NetworkClientList.Add(networkClient);
                 TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
                 {
@@ -233,7 +236,7 @@ public class NetworkManager : MonoBehaviour
         {
             foreach (NetworkClient c in NetworkClientList)
             {
-                if (c.Client.Available > 0)
+                if (c.TcpClient.Available > 0)
                 {
                     MemoryStream ms = new MemoryStream();
                     byte[] buffer = new byte[0x1000];
@@ -245,7 +248,7 @@ public class NetworkManager : MonoBehaviour
                     while (c.NetworkStream.DataAvailable);
 
                     TcpNetworkMessage tcpNetworkMessage = MessagePackSerializer.Deserialize<TcpNetworkMessage>(ms.ToArray());
-                    GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage, c.Client);
+                    GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage, c.TcpClient);
                 }
             }
             Thread.Sleep(100);
@@ -356,13 +359,46 @@ public class NetworkManager : MonoBehaviour
     #endregion
 
     #region Udp Server
-    public IEnumerator SendUdpMessage()
+    public async void SendUdpClientMessage(NetworkClient networkClient, UdpNetworkMessage udpNetworkMessage)
     {
-        yield return null;
+        byte[] messageToSend = MessagePackSerializer.Serialize(udpNetworkMessage);
+        await networkClient.UdpClient.SendAsync(messageToSend, messageToSend.Length);
     }
+
+    public void SendUdpClientMessageToAll(UdpNetworkMessage udpNetworkMessage)
+    {
+        byte[] messageToSend = MessagePackSerializer.Serialize(udpNetworkMessage);
+        foreach (NetworkClient c in NetworkClientList)
+        {
+            c.UdpClient.SendAsync(messageToSend, messageToSend.Length);
+        }
+    }
+
+    public void ReceiveUdpClientMessage()
+    {
+        foreach(NetworkClient c in NetworkClientList)
+        {
+            if(c.UdpClient.Available > 0)
+            {
+                IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                byte[] data = c.UdpClient.Receive(ref iPEndPoint);
+                UdpNetworkMessage networkMessage = MessagePackSerializer.Deserialize<UdpNetworkMessage>(data);
+                GameManager.Instance.NetworkMessageManager.ProcessUdpNetworkMessage(networkMessage, iPEndPoint);
+            }
+        }
+    }
+
     #endregion
 
     #region Udp Client
+    public async void SendUdpServerMessage(NetworkClient networkClient, UdpNetworkMessage udpNetworkMessage)
+    {
 
+    }
+    
+    public async void ReceiveUdpServerMessage()
+    {
+        
+    }
     #endregion
 }
