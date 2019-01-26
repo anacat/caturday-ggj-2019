@@ -124,13 +124,13 @@ public class NetworkManager : MonoBehaviour
     {
         foreach (NetworkServer n in _broadcastList)
         {
-            ExecuteOnMainThread.Enqueue(() => { StartCoroutine(DestroyButton(n.InstantiatedButton)); });
+            ExecuteOnMainThread.Enqueue(() => { StartCoroutine(DestroyButtom(n.InstantiatedButton)); });
         }
         _broadcastList.Clear();
         _isFindingServers = false;
     }
 
-    private IEnumerator DestroyButton(GameObject button)
+    private IEnumerator DestroyButtom(GameObject button)
     {
         Destroy(button);
         yield return null;
@@ -157,7 +157,7 @@ public class NetworkManager : MonoBehaviour
             {
                 if (_broadcastList[x].InstantiatedButtonStartTime.AddSeconds(5) < DateTime.Now)
                 {
-                    ExecuteOnMainThread.Enqueue(() => { StartCoroutine(DestroyButton(_broadcastList[x].InstantiatedButton)); });
+                    Destroy(_broadcastList[x].InstantiatedButton);
                     _broadcastList.RemoveAt(x);
                 }
             }
