@@ -7,7 +7,7 @@ public class NetworkServer
 {
     public GameObject InstantiatedButton;
     public DateTime InstantiatedButtonStartTime;
-    public NetworkMessage NetworkMessage;
+    public BroadcastMessage NetworkMessage;
 
     // Start is called before the first frame update
     void Start()

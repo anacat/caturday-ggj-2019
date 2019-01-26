@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -16,24 +17,28 @@ public class NetworkManager : MonoBehaviour
     private IPEndPoint _broadcastIpEndPoint;
     private bool _isBroadcasting;
     private bool _isFindingServers;
-    private NetworkMessage _broadcastMessage;
+    private BroadcastMessage _broadcastMessage;
     private byte[] _broadcastMessageBytes;
-    private float _broadcastSleepTime;
     private int _broadcastPort;
     public GameObject ParentMenu;
     public GameObject MenuItem;
     public GameObject MyIpAddress;
     private IPEndPoint _serverBroadcastEndPoint;
     private List<NetworkServer> _broadcastList;
-
-
-    
+    [HideInInspector]
+    public bool IsServer;
+    private TcpListener _tcpListener;
+    private int _tcpPort;
+    private bool _tcpServerIsRunning;
+    [HideInInspector]
+    public List<NetworkClient> networkClientList;
 
     private void Awake()
     {
-        _broadcastSleepTime = 1f;
         _broadcastPort = 13947;
+        _tcpPort = 13948;
         _broadcastList = new List<NetworkServer>();
+        networkClientList = new List<NetworkClient>();
     }
 
 
@@ -41,7 +46,7 @@ public class NetworkManager : MonoBehaviour
     public void StartBroadcasting()
     {
         _isBroadcasting = true;
-        _broadcastMessage = new NetworkMessage()
+        _broadcastMessage = new BroadcastMessage()
         {
             BroadcasterIpAddress = GetLocalIPAddress(),
             BroadcasterUuid = Guid.NewGuid().ToString(),
@@ -76,7 +81,7 @@ public class NetworkManager : MonoBehaviour
         while (_isBroadcasting)
         {
             _udpBroadcaster.Send(_broadcastMessageBytes, _broadcastMessageBytes.Length, _broadcastIpEndPoint);
-            yield return new WaitForSeconds(_broadcastSleepTime);
+            yield return new WaitForSeconds(1000);
         }
     }
 
@@ -112,7 +117,7 @@ public class NetworkManager : MonoBehaviour
             if(_udpBroadcastClient.Available > 0)
             {
                 byte[] data = _udpBroadcastClient.Receive(ref _serverBroadcastEndPoint);
-                NetworkMessage networkMessage = MessagePackSerializer.Deserialize<NetworkMessage>(data);
+                BroadcastMessage networkMessage = MessagePackSerializer.Deserialize<BroadcastMessage>(data);
                 if (_broadcastList.FirstOrDefault(c => c.NetworkMessage.BroadcasterUuid == networkMessage.BroadcasterUuid) == null)
                 {
                     NetworkServer networkServer = new NetworkServer();
@@ -124,7 +129,8 @@ public class NetworkManager : MonoBehaviour
                 }
                 Debug.Log(networkMessage);
             }
-            yield return new WaitForSeconds(_broadcastSleepTime);
+            yield return new WaitForSeconds(1000);
+            // todo remvoe items if they timeout
         }
     }
     #endregion
@@ -132,7 +138,27 @@ public class NetworkManager : MonoBehaviour
     #region Tcp
     public void StartTcpServer()
     {
+        _tcpServerIsRunning = true;
+        _tcpListener = new TcpListener(IPAddress.Parse(GetLocalIPAddress()), _tcpPort);
+        _tcpListener.Start();
+    }
 
+    private IEnumerator InitializeTcpServer()
+    {
+        while (_tcpServerIsRunning)
+        {
+            if (_tcpListener.Pending())
+            {
+                Task<TcpClient> tcpClientTask = _tcpListener.AcceptTcpClientAsync();
+                Task.WaitAll(tcpClientTask);
+                NetworkClient networkClient = new NetworkClient()
+                {
+                    Client = tcpClientTask.Result
+                };
+
+            }
+            yield return new WaitForSeconds(1000);
+        }
     }
     #endregion
 }

@@ -1,7 +1,7 @@
 ﻿using MessagePack;
 
 [MessagePackObject]
-public class NetworkMessage
+public class BroadcastMessage
 {
     [Key(0)]
     public MessageType MessageType { get; set; }
