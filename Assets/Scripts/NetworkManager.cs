@@ -32,9 +32,13 @@ public class NetworkManager : MonoBehaviour
     private bool _tcpServerIsRunning;
     [HideInInspector]
     public List<NetworkClient> networkClientList;
+    public TcpClient TcpNetworkClient;
+    public TcpClient TcpNetworkServer;
+    private Guid _ownGuid;
 
     private void Awake()
     {
+        _ownGuid = Guid.NewGuid();
         _broadcastPort = 13947;
         _tcpPort = 13948;
         _broadcastList = new List<NetworkServer>();
@@ -49,7 +53,7 @@ public class NetworkManager : MonoBehaviour
         _broadcastMessage = new BroadcastMessage()
         {
             BroadcasterIpAddress = GetLocalIPAddress(),
-            BroadcasterUuid = Guid.NewGuid().ToString(),
+            BroadcasterUuid = _ownGuid.ToString(),
             MessageType = MessageType.HelloWorld
         };
         _broadcastMessageBytes = MessagePackSerializer.Serialize(_broadcastMessage);
@@ -81,7 +85,7 @@ public class NetworkManager : MonoBehaviour
         while (_isBroadcasting)
         {
             _udpBroadcaster.Send(_broadcastMessageBytes, _broadcastMessageBytes.Length, _broadcastIpEndPoint);
-            yield return new WaitForSeconds(1000);
+            yield return new WaitForSeconds(1);
         }
     }
 
@@ -124,12 +128,13 @@ public class NetworkManager : MonoBehaviour
                     networkServer.NetworkMessage = networkMessage;
                     networkServer.InstantiatedButtonStartTime = DateTime.Now;
                     networkServer.InstantiatedButton = Instantiate(MenuItem, ParentMenu.transform);
+                    networkServer.InstantiatedButton.GetComponent<Button>().onClick.AddListener(() => ConnectToTcpServer(networkMessage));
                     networkServer.InstantiatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 180 - (90 * _broadcastList.Count - 10), 0);
                     _broadcastList.Add(networkServer);
                 }
                 Debug.Log(networkMessage);
             }
-            yield return new WaitForSeconds(1000);
+            yield return new WaitForSeconds(1);
             // todo remvoe items if they timeout
         }
     }
@@ -141,6 +146,11 @@ public class NetworkManager : MonoBehaviour
         _tcpServerIsRunning = true;
         _tcpListener = new TcpListener(IPAddress.Parse(GetLocalIPAddress()), _tcpPort);
         _tcpListener.Start();
+    }
+
+    public void StopTcpServer()
+    {
+        _tcpServerIsRunning = false;
     }
 
     private IEnumerator InitializeTcpServer()
@@ -157,8 +167,40 @@ public class NetworkManager : MonoBehaviour
                 };
 
             }
-            yield return new WaitForSeconds(1000);
+            yield return new WaitForSeconds(1);
         }
+    }
+
+    public void ConnectToTcpServer(BroadcastMessage broadcastMessage)
+    {
+        TcpNetworkClient = new TcpClient();
+        StartCoroutine(InitializeTcpClient(broadcastMessage));
+    }
+
+    private IEnumerator InitializeTcpClient(BroadcastMessage broadcastMessage)
+    {
+        Task.WaitAll(TcpNetworkClient.ConnectAsync(IPAddress.Parse(broadcastMessage.BroadcasterIpAddress), _tcpPort));
+        if (TcpNetworkClient.Connected)
+        {
+            TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
+            {
+                ClientUuid = _ownGuid.ToString(),
+                MessageType = MessageType.JoinGame
+            };
+            SendTcpMessage(tcpNetworkMessage);
+        }
+        yield return null;
+    }
+
+    public IEnumerator SendTcpMessage(TcpNetworkMessage tcpNetworkMessage)
+    {
+        //TcpNetworkServer
+        yield return null;
+    }
+
+    public IEnumerator SendTcpMessageToAll()
+    {
+        yield return null;
     }
     #endregion
 }

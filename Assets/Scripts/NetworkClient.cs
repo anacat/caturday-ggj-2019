@@ -6,4 +6,5 @@ using UnityEngine;
 public class NetworkClient : ScriptableObject
 {
     public TcpClient Client {get; set;}
+    public string ClientUuid { get; set; }
 }
