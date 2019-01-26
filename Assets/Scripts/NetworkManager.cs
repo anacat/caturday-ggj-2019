@@ -75,7 +75,7 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    private void StartBroadcastClient()
+    public void StartBroadcastClient()
     {
         UdpClient udpClient = new UdpClient();
 
@@ -88,8 +88,13 @@ public class NetworkManager : MonoBehaviour
         udpClient.Client.Bind(_serverBroadcastEndPoint);
     }
 
-    private void StopBroadcastClient()
+    public void StopBroadcastClient()
     {
+        foreach (NetworkClient n in _broadcastList)
+        {
+            Destroy(n.InstantiatedButton);
+        }
+        _broadcastList.Clear();
         _isFindingServers = false;
     }
 
@@ -104,22 +109,11 @@ public class NetworkManager : MonoBehaviour
                 NetworkClient networkClient = new NetworkClient();
                 networkClient.NetworkMessage = networkMessage;
                 networkClient.InstantiatedButtonStartTime = DateTime.Now;
-                networkClient.InstantiatedButton = Instantiate(MenuItem, new Vector3(0,180-(90 * CountChildren(ParentMenu.transform) - 10),0), Quaternion.identity, ParentMenu.transform);
+                networkClient.InstantiatedButton = Instantiate(MenuItem, new Vector3(0,180-(90 * _broadcastList.Count - 10),0), Quaternion.identity, ParentMenu.transform);
             }
             Debug.Log(networkMessage);
             yield return new WaitForSeconds(_broadcastClientSleepTime);
         }
-    }
-
-    int CountChildren(Transform a)
-    {
-        int childCount = 0;
-        foreach (Transform b in a)
-        {
-            childCount++;
-            childCount += CountChildren(b);
-        }
-        return childCount;
     }
     #endregion
 }
