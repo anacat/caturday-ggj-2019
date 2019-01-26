@@ -52,7 +52,6 @@ public class NetworkManager : MonoBehaviour
 
     public virtual void Update()
     {
-        // dispatch stuff on main thread
         while (ExecuteOnMainThread.Count > 0)
         {
             ExecuteOnMainThread.Dequeue().Invoke();
@@ -74,7 +73,6 @@ public class NetworkManager : MonoBehaviour
         _broadcastIpEndPoint = new IPEndPoint(IPAddress.Parse("239.0.0.254"), _broadcastPort);
         Thread t = new Thread(InitializeBroadcastServer);
         t.Start();
-        //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(InitializeBroadcastServer()); });
     }
 
     public void StopBroadcasting()
@@ -101,7 +99,6 @@ public class NetworkManager : MonoBehaviour
         {
             _udpBroadcaster.Send(_broadcastMessageBytes, _broadcastMessageBytes.Length, _broadcastIpEndPoint);
             Thread.Sleep(1000);
-            //yield return new WaitForSeconds(1);
         }
     }
 
@@ -120,17 +117,22 @@ public class NetworkManager : MonoBehaviour
         _udpBroadcastClient.JoinMulticastGroup(ipAddress,IPAddress.Parse(GetLocalIPAddress()));
         Thread t = new Thread(InitializeBroadcastClient);
         t.Start();
-        //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(InitializeBroadcastClient()); });
     }
 
     public void StopBroadcastClient()
     {
         foreach (NetworkServer n in _broadcastList)
         {
-            Destroy(n.InstantiatedButton);
+            ExecuteOnMainThread.Enqueue(() => { StartCoroutine(DestroyButtom(n.InstantiatedButton)); });
         }
         _broadcastList.Clear();
         _isFindingServers = false;
+    }
+
+    private IEnumerator DestroyButtom(GameObject button)
+    {
+        Destroy(button);
+        yield return null;
     }
 
     private void InitializeBroadcastClient()
@@ -159,7 +161,6 @@ public class NetworkManager : MonoBehaviour
                 }
             }
             Thread.Sleep(1000);
-            //yield return new WaitForSeconds(1);
         }
     }
 
@@ -187,8 +188,6 @@ public class NetworkManager : MonoBehaviour
         t1.Start();
         Thread t2 = new Thread(ReceiveTcpClientMessage);
         t2.Start();
-        //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(InitializeTcpServer()); });
-        //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(ReceiveTcpClientMessage()); });
     }
 
     public void StopTcpServer()
@@ -203,8 +202,7 @@ public class NetworkManager : MonoBehaviour
             if (_tcpListener.Pending())
             {
                 TcpClient tcpClientTask = await _tcpListener.AcceptTcpClientAsync();
-                //Task.WaitAll(tcpClientTask);
-                NetworkClient networkClient = ScriptableObject.CreateInstance<NetworkClient>();
+                NetworkClient networkClient = new NetworkClient();
 
                 networkClient.Client = tcpClientTask;
                 networkClient.NetworkStream = tcpClientTask.GetStream();
@@ -218,10 +216,8 @@ public class NetworkManager : MonoBehaviour
                 Thread t = new Thread(new ParameterizedThreadStart(SendTcpClientMessage));
                 object[] objectToSend = { tcpNetworkMessage, networkClient.NetworkStream };
                 t.Start(objectToSend);
-                //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(SendTcpClientMessage(tcpNetworkMessage, networkClient.NetworkStream)); });
             }
             Thread.Sleep(1000);
-            //yield return new WaitForSeconds(1);
         }
     }
 
@@ -243,7 +239,6 @@ public class NetworkManager : MonoBehaviour
                     do
                     {
                         int readBytes = await c.NetworkStream.ReadAsync(buffer, 0, buffer.Length);
-                        //Task.WaitAll(readBytes);
                         ms.Write(buffer, 0, readBytes);
                     }
                     while (c.NetworkStream.DataAvailable);
@@ -253,9 +248,7 @@ public class NetworkManager : MonoBehaviour
                 }
             }
             Thread.Sleep(100);
-            //yield return new WaitForSeconds(0.1f);
         }
-        //yield return null;
     }
 
     public void SendTcpClientMessage(object value)
@@ -264,7 +257,6 @@ public class NetworkManager : MonoBehaviour
         NetworkStream networkStream = ((object[])value)[1] as NetworkStream;
         byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
         networkStream.WriteAsync(bytesToSend, 0, bytesToSend.Length);
-        //yield return null;
     }
 
 
@@ -276,7 +268,6 @@ public class NetworkManager : MonoBehaviour
             byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
             await NetworkClientList[x].NetworkStream.WriteAsync(bytesToSend, 0, bytesToSend.Length);
         }
-        //yield return null;
     }
     #endregion
 
@@ -286,7 +277,6 @@ public class NetworkManager : MonoBehaviour
         TcpNetworkClient = new TcpClient();
         Thread t = new Thread(new ParameterizedThreadStart(InitializeTcpClient));
         t.Start(broadcastMessage.BroadcasterIpAddress);
-        //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(InitializeTcpClient(broadcastMessage.BroadcasterIpAddress)); });
     }
 
     public void ConnectToTcpServer()
@@ -294,21 +284,17 @@ public class NetworkManager : MonoBehaviour
         TcpNetworkClient = new TcpClient();
         Thread t = new Thread(new ParameterizedThreadStart(InitializeTcpClient));
         t.Start(TargetIpAddress.GetComponent<InputField>().text);
-        //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(InitializeTcpClient(TargetIpAddress.GetComponent<InputField>().text)); });
     }
 
     private void InitializeTcpClient(object ipAddress)
     {
         _tcpClientIsRunning = true;
         ProcessInitializeTcpClient(ipAddress.ToString());
-        
-        //yield return null;
     }
 
     private async void ProcessInitializeTcpClient(string ipAddress)
     {
         await TcpNetworkClient.ConnectAsync(IPAddress.Parse(ipAddress), _tcpPort);
-        //Task.WaitAll(TcpNetworkClient.ConnectAsync(IPAddress.Parse(ipAddress), _tcpPort));
         if (TcpNetworkClient.Connected)
         {
             TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
@@ -321,8 +307,6 @@ public class NetworkManager : MonoBehaviour
             t1.Start();
             Thread t2 = new Thread(new ParameterizedThreadStart(SendTcpServerMessage));
             t2.Start(tcpNetworkMessage);
-            //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(ReceiveTcpServerMessage()); });
-            //ExecuteOnMainThread.Enqueue(() => { StartCoroutine(SendTcpServerMessage(tcpNetworkMessage)); });
         }
         else
         {
@@ -333,8 +317,6 @@ public class NetworkManager : MonoBehaviour
     public void SendTcpServerMessage(object tcpNetworkMessage)
     {
         ProcessSendTcpServerMessage(tcpNetworkMessage as TcpNetworkMessage);
-        //Task.WaitAll(TcpNetworkClientStream.WriteAsync(bytesToSend,0, bytesToSend.Length));
-        //yield return null;
     }
 
     private async void ProcessSendTcpServerMessage(TcpNetworkMessage tcpNetworkMessage)
@@ -346,7 +328,6 @@ public class NetworkManager : MonoBehaviour
     public void ReceiveTcpServerMessage()
     {
         ProcessReceiveTcpServerMessages();
-        
     }
 
     private async void ProcessReceiveTcpServerMessages()
@@ -355,13 +336,11 @@ public class NetworkManager : MonoBehaviour
         {
             if (TcpNetworkClient.Available > 0)
             {
-                //ProcessReceiveTcpServerMessages();
                 MemoryStream ms = new MemoryStream();
                 byte[] buffer = new byte[0x1000];
                 do
                 {
                     int readBytes = await TcpNetworkClientStream.ReadAsync(buffer, 0, buffer.Length);
-                    //Task.WaitAll(readBytes);
                     ms.Write(buffer, 0, readBytes);
                 }
                 while (TcpNetworkClientStream.DataAvailable);
@@ -370,9 +349,7 @@ public class NetworkManager : MonoBehaviour
                 GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage, TcpNetworkClient);
             }
             Thread.Sleep(100);
-            //yield return new WaitForSeconds(0.1f);
         }
-        //yield return null;
     }
 
     #endregion
@@ -380,7 +357,6 @@ public class NetworkManager : MonoBehaviour
     #region Udp Server
     public IEnumerator SendUdpMessage()
     {
-        //_udpBroadcaster.Send(_broadcastMessageBytes, _broadcastMessageBytes.Length, _broadcastIpEndPoint);
         yield return null;
     }
     #endregion
