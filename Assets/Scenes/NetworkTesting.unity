@@ -2290,6 +2290,8 @@ MonoBehaviour:
   MenuItem: {fileID: 5102962368447948982, guid: aefa025edd9480d4398dc38b28bfcbea,
     type: 3}
   MyIpAddress: {fileID: 834533801}
+  IsServer: 0
+  networkClientList: []
 --- !u!114 &1184656891
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2306,6 +2308,7 @@ MonoBehaviour:
   MainMenu: {fileID: 1837244983}
   Rooms: {fileID: 204993387}
   Game: {fileID: 848588258}
+  IpAddress: {fileID: 834533801}
 --- !u!1 &1204636975
 GameObject:
   m_ObjectHideFlags: 0

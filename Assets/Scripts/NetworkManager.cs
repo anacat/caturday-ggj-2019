@@ -31,7 +31,7 @@ public class NetworkManager : MonoBehaviour
     private int _tcpPort;
     private bool _tcpServerIsRunning;
     [HideInInspector]
-    public List<NetworkClient> networkClientList;
+    public List<NetworkClient> NetworkClientList;
     public TcpClient TcpNetworkClient;
     public TcpClient TcpNetworkServer;
     private Guid _ownGuid;
@@ -42,7 +42,7 @@ public class NetworkManager : MonoBehaviour
         _broadcastPort = 13947;
         _tcpPort = 13948;
         _broadcastList = new List<NetworkServer>();
-        networkClientList = new List<NetworkClient>();
+        NetworkClientList = new List<NetworkClient>();
     }
 
 
@@ -58,7 +58,7 @@ public class NetworkManager : MonoBehaviour
         };
         _broadcastMessageBytes = MessagePackSerializer.Serialize(_broadcastMessage);
         _udpBroadcaster = new UdpClient();
-        _broadcastIpEndPoint = new IPEndPoint(IPAddress.Broadcast, _broadcastPort);
+        _broadcastIpEndPoint = new IPEndPoint(IPAddress.Parse("239.0.0.254"), _broadcastPort);
         StartCoroutine(InitializeBroadcastServer());
     }
 
@@ -96,11 +96,12 @@ public class NetworkManager : MonoBehaviour
 
         _udpBroadcastClient.ExclusiveAddressUse = false;
         _serverBroadcastEndPoint = new IPEndPoint(IPAddress.Any, _broadcastPort);
-
         _udpBroadcastClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         _udpBroadcastClient.ExclusiveAddressUse = false;
 
         _udpBroadcastClient.Client.Bind(_serverBroadcastEndPoint);
+        IPAddress ipAddress = IPAddress.Parse("239.0.0.254");
+        _udpBroadcastClient.JoinMulticastGroup(ipAddress,IPAddress.Parse(GetLocalIPAddress()));
         StartCoroutine(InitializeBroadcastClient());
     }
 
@@ -132,20 +133,31 @@ public class NetworkManager : MonoBehaviour
                     networkServer.InstantiatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 180 - (90 * _broadcastList.Count - 10), 0);
                     _broadcastList.Add(networkServer);
                 }
-                Debug.Log(networkMessage);
+                else
+                {
+                    _broadcastList.FirstOrDefault(c => c.NetworkMessage.BroadcasterUuid == networkMessage.BroadcasterUuid).InstantiatedButtonStartTime = DateTime.Now;
+                }
+            }
+            for (int x = _broadcastList.Count - 1; x >= 0; x--)
+            {
+                if (_broadcastList[x].InstantiatedButtonStartTime.AddSeconds(5) < DateTime.Now)
+                {
+                    Destroy(_broadcastList[x].InstantiatedButton);
+                    _broadcastList.RemoveAt(x);
+                }
             }
             yield return new WaitForSeconds(1);
-            // todo remvoe items if they timeout
         }
     }
     #endregion
 
-    #region Tcp
+    #region Tcp Server
     public void StartTcpServer()
     {
         _tcpServerIsRunning = true;
         _tcpListener = new TcpListener(IPAddress.Parse(GetLocalIPAddress()), _tcpPort);
         _tcpListener.Start();
+        StartCoroutine(InitializeTcpServer());
     }
 
     public void StopTcpServer()
@@ -165,11 +177,30 @@ public class NetworkManager : MonoBehaviour
                 {
                     Client = tcpClientTask.Result
                 };
-
+                NetworkClientList.Add(networkClient);
             }
             yield return new WaitForSeconds(1);
         }
     }
+
+    private IEnumerator ReceiveTcpMessage()
+    {
+        yield return null;
+    }
+
+    public IEnumerator SendTcpMessage(TcpNetworkMessage tcpNetworkMessage)
+    {
+        //TcpNetworkServer
+        yield return null;
+    }
+
+    public IEnumerator SendTcpMessageToAll()
+    {
+        yield return null;
+    }
+    #endregion
+
+    #region Tcp Client
 
     public void ConnectToTcpServer(BroadcastMessage broadcastMessage)
     {
@@ -189,17 +220,6 @@ public class NetworkManager : MonoBehaviour
             };
             SendTcpMessage(tcpNetworkMessage);
         }
-        yield return null;
-    }
-
-    public IEnumerator SendTcpMessage(TcpNetworkMessage tcpNetworkMessage)
-    {
-        //TcpNetworkServer
-        yield return null;
-    }
-
-    public IEnumerator SendTcpMessageToAll()
-    {
         yield return null;
     }
     #endregion
