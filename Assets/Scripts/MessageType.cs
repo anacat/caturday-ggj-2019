@@ -6,5 +6,4 @@ public enum MessageType
 {
     HelloWorld,
     JoinGame,
-
 }

@@ -5,7 +5,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance = null;
-    public NetworkManager NetworkManager { get; private set; }
+    [HideInInspector]
+    public NetworkManager NetworkManager;
 
     void Start()
     {
@@ -23,12 +24,14 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Initialize()
     {
+        NetworkManager = GetComponent<NetworkManager>();
         yield return StartCoroutine(InitializeNetwork());
     }
     
     private IEnumerator InitializeNetwork()
     {
-        NetworkManager = new NetworkManager();
+        NetworkManager.InitializeBroadcast();
+        //NetworkManager.SetBroadcasting(true);
         yield return null;
     }
 }

@@ -1,18 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using MessagePack;
 
-public class NetworkMessage : MonoBehaviour
+[MessagePackObject]
+public class NetworkMessage
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Key(0)]
+    public MessageType MessageType { get; set; }
+    [Key(1)]
+    public string BroadcasterIpAddress { get; set; }
+    [Key(2)]
+    public string BroadcasterUuid { get; set; }
 }
