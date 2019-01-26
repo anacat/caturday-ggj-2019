@@ -158,8 +158,8 @@ public class NetworkManager : MonoBehaviour
     public void StartTcpServer()
     {
         _tcpServerIsRunning = true;
-        _tcpListener = new TcpListener(IPAddress.Parse(GetLocalIPAddress()), _tcpPort);
-        _tcpListener.Start();
+        _tcpListener = new TcpListener(new IPEndPoint(IPAddress.Any, _tcpPort));
+        _tcpListener.Start(50);
         StartCoroutine(InitializeTcpServer());
         StartCoroutine(ReceiveTcpClientMessage());
     }
