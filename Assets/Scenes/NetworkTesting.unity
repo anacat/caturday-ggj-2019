@@ -2238,6 +2238,7 @@ GameObject:
   - component: {fileID: 1184656888}
   - component: {fileID: 1184656890}
   - component: {fileID: 1184656891}
+  - component: {fileID: 1184656892}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2259,6 +2260,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NetworkManager: {fileID: 0}
+  NetworkMessageManager: {fileID: 0}
 --- !u!4 &1184656889
 Transform:
   m_ObjectHideFlags: 0
@@ -2310,6 +2312,19 @@ MonoBehaviour:
   Rooms: {fileID: 204993387}
   Game: {fileID: 848588258}
   IpAddress: {fileID: 834533801}
+--- !u!114 &1184656892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1184656887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: b30321c26fd755442bbbbd46f502cad5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1204636975
 GameObject:
   m_ObjectHideFlags: 0

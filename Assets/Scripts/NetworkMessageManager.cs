@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using UnityEngine;
 
-public class NetworkMessageManager
+public class NetworkMessageManager : MonoBehaviour
 {
     public void ProcessTcpNetworkMessage(TcpNetworkMessage message, TcpClient tcpClient)
     {

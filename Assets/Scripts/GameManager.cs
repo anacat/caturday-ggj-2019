@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator InitializeNetwork()
     {
         NetworkManager = GetComponent<NetworkManager>();
+        NetworkMessageManager = GetComponent<NetworkMessageManager>();
         yield return null;
     }
 }
