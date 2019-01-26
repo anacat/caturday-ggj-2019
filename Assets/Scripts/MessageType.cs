@@ -7,14 +7,11 @@ public enum MessageType
     None,
     ServerOn,
     Connected,
+    Connecting,
     ConnectionRefused,
     ConnectionAccepted,
     ConnectingAuthentication,
     MovementStarted,
     MovementNotAllowed,
     AssetsPositions,
-
-    HelloWorld,
-    JoinGame,
-    HelloFromServer,
 }

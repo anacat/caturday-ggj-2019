@@ -69,7 +69,7 @@ public class NetworkManager : MonoBehaviour
         {
             BroadcasterIpAddress = GetLocalIPAddress(),
             BroadcasterUuid = _ownGuid.ToString(),
-            MessageType = MessageType.HelloWorld
+            MessageType = MessageType.ServerOn
         };
         _broadcastMessageBytes = MessagePackSerializer.Serialize(_broadcastMessage);
         _udpBroadcaster = new UdpClient();
@@ -215,7 +215,7 @@ public class NetworkManager : MonoBehaviour
                 TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
                 {
                     ClientUuid = _ownGuid.ToString(),
-                    MessageType = MessageType.HelloFromServer
+                    MessageType = MessageType.ConnectionAccepted
                 };
                 Thread t = new Thread(new ParameterizedThreadStart(SendTcpClientMessage));
                 object[] objectToSend = { tcpNetworkMessage, networkClient.NetworkStream };
@@ -304,7 +304,7 @@ public class NetworkManager : MonoBehaviour
             TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
             {
                 ClientUuid = _ownGuid.ToString(),
-                MessageType = MessageType.JoinGame
+                MessageType = MessageType.Connecting
             };
             TcpNetworkClientStream = TcpNetworkClient.GetStream();
             Thread t1 = new Thread(ReceiveTcpServerMessage);
