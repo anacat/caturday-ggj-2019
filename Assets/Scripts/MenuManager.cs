@@ -38,15 +38,10 @@ public class MenuManager : MonoBehaviour
         Game.SetActive(true);
     }
 
-    public void JoinGame()
+    public void JoinIpGame()
     {
         Rooms.SetActive(false);
         GameManager.Instance.NetworkManager.StopBroadcastClient();
         GameManager.Instance.NetworkManager.ConnectToTcpServer();
-    }
-
-    public void JoinIpGame()
-    {
-        //_ipAddressText.text
     }
 }

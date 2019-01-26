@@ -35,8 +35,9 @@ public class NetworkManager : MonoBehaviour
     [HideInInspector]
     public List<NetworkClient> NetworkClientList;
     public TcpClient TcpNetworkClient;
-    public TcpClient TcpNetworkServer;
+    public NetworkStream TcpNetworkClientStream;
     private Guid _ownGuid;
+    private bool _tcpClientIsRunning;
 
     private void Awake()
     {
@@ -205,27 +206,32 @@ public class NetworkManager : MonoBehaviour
                     while (c.NetworkStream.DataAvailable);
 
                     TcpNetworkMessage tcpNetworkMessage = MessagePackSerializer.Deserialize<TcpNetworkMessage>(ms.ToArray());
-                    Debug.Log(tcpNetworkMessage.MessageType);
+                    GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage);
                 }
             }
-            yield return new WaitForSeconds(0.1f);
         }
+        yield return null;
     }
 
     public IEnumerator SendTcpClientMessage(TcpNetworkMessage tcpNetworkMessage)
     {
-        //TcpNetworkServer
+        byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
+        Task.WaitAll(TcpNetworkClientStream.WriteAsync(bytesToSend, 0, bytesToSend.Length));
         yield return null;
     }
 
-    public IEnumerator SendTcpClientMessageToAll()
+    public IEnumerator SendTcpClientMessageToAll(TcpNetworkMessage tcpNetworkMessage)
     {
+        for(int x = 0; x < NetworkClientList.Count; x++)
+        {
+            byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
+            Task.WaitAll(NetworkClientList[x].NetworkStream.WriteAsync(bytesToSend, 0, bytesToSend.Length));
+        }
         yield return null;
     }
     #endregion
 
     #region Tcp Client
-
     public void ConnectToTcpServer(BroadcastMessage broadcastMessage)
     {
         TcpNetworkClient = new TcpClient();
@@ -240,6 +246,7 @@ public class NetworkManager : MonoBehaviour
 
     private IEnumerator InitializeTcpClient(string ipAddress)
     {
+        _tcpClientIsRunning = true;
         Task.WaitAll(TcpNetworkClient.ConnectAsync(IPAddress.Parse(ipAddress), _tcpPort));
         if (TcpNetworkClient.Connected)
         {
@@ -248,7 +255,12 @@ public class NetworkManager : MonoBehaviour
                 ClientUuid = _ownGuid.ToString(),
                 MessageType = MessageType.JoinGame
             };
+            TcpNetworkClientStream = TcpNetworkClient.GetStream();
             SendTcpServerMessage(tcpNetworkMessage);
+        }
+        else
+        {
+            _tcpClientIsRunning = false;
         }
         yield return null;
     }
@@ -256,7 +268,37 @@ public class NetworkManager : MonoBehaviour
     public void SendTcpServerMessage(TcpNetworkMessage tcpNetworkMessage)
     {
         byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
-        Task.WaitAll(TcpNetworkClient.GetStream().WriteAsync(bytesToSend,0, bytesToSend.Length));
+        Task.WaitAll(TcpNetworkClientStream.WriteAsync(bytesToSend,0, bytesToSend.Length));
     }
+
+    public IEnumerator ReceiveTcpServerMessage()
+    {
+        while (_tcpServerIsRunning)
+        {
+
+            if (TcpNetworkClient.Available > 0)
+            {
+                MemoryStream ms = new MemoryStream();
+                byte[] buffer = new byte[0x1000];
+                do
+                {
+                    Task<int> readBytes = TcpNetworkClientStream.ReadAsync(buffer, 0, buffer.Length);
+                    Task.WaitAll(readBytes);
+                    ms.Write(buffer, 0, readBytes.Result);
+                }
+                while (TcpNetworkClientStream.DataAvailable);
+
+                TcpNetworkMessage tcpNetworkMessage = MessagePackSerializer.Deserialize<TcpNetworkMessage>(ms.ToArray());
+                GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage);
+            }
+        }
+        yield return null;
+    }
+    #endregion
+
+    #region Udp Server
+    #endregion
+
+    #region Udp Client
     #endregion
 }

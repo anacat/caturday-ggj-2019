@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance = null;
     [HideInInspector]
     public NetworkManager NetworkManager;
+    public NetworkMessageManager NetworkMessageManager;
 
     void Start()
     {
