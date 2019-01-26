@@ -2290,8 +2290,9 @@ MonoBehaviour:
   MenuItem: {fileID: 5102962368447948982, guid: aefa025edd9480d4398dc38b28bfcbea,
     type: 3}
   MyIpAddress: {fileID: 834533801}
+  TargetIpAddress: {fileID: 1972648499}
   IsServer: 0
-  networkClientList: []
+  NetworkClientList: []
 --- !u!114 &1184656891
 MonoBehaviour:
   m_ObjectHideFlags: 0

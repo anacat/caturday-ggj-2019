@@ -34,6 +34,7 @@ public class MenuManager : MonoBehaviour
     {
         MainMenu.SetActive(false);
         GameManager.Instance.NetworkManager.StartBroadcasting();
+        GameManager.Instance.NetworkManager.StartTcpServer();
         Game.SetActive(true);
     }
 
@@ -41,6 +42,7 @@ public class MenuManager : MonoBehaviour
     {
         Rooms.SetActive(false);
         GameManager.Instance.NetworkManager.StopBroadcastClient();
+        GameManager.Instance.NetworkManager.ConnectToTcpServer();
     }
 
     public void JoinIpGame()
