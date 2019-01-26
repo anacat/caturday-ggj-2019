@@ -132,7 +132,7 @@ public class NetworkManager : MonoBehaviour
                     networkServer.NetworkMessage = networkMessage;
                     networkServer.InstantiatedButtonStartTime = DateTime.Now;
                     networkServer.InstantiatedButton = Instantiate(MenuItem, ParentMenu.transform);
-                    networkServer.InstantiatedButton.GetComponent<Button>().onClick.AddListener(() => GameManager.Instance.MenuManager.JoinIpGame());
+                    networkServer.InstantiatedButton.GetComponent<Button>().onClick.AddListener(() => GameManager.Instance.MenuManager.JoinIpGame(networkMessage));
                     networkServer.InstantiatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 180 - (90 * _broadcastList.Count - 10), 0);
                     _broadcastList.Add(networkServer);
                 }
