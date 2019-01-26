@@ -257,6 +257,7 @@ public class NetworkManager : MonoBehaviour
                 MessageType = MessageType.JoinGame
             };
             TcpNetworkClientStream = TcpNetworkClient.GetStream();
+            StartCoroutine(ReceiveTcpServerMessage());
             SendTcpServerMessage(tcpNetworkMessage);
         }
         else
@@ -274,7 +275,7 @@ public class NetworkManager : MonoBehaviour
 
     public IEnumerator ReceiveTcpServerMessage()
     {
-        while (_tcpServerIsRunning)
+        while (_tcpClientIsRunning)
         {
             if (TcpNetworkClient.Available > 0)
             {
@@ -298,6 +299,7 @@ public class NetworkManager : MonoBehaviour
     #endregion
 
     #region Udp Server
+    
     #endregion
 
     #region Udp Client
