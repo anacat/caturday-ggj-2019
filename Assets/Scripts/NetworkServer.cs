@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NetworkClient
+public class NetworkServer
 {
     public GameObject InstantiatedButton;
     public DateTime InstantiatedButtonStartTime;

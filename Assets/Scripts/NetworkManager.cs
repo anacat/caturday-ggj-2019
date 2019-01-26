@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 public class NetworkManager : MonoBehaviour
 {
-    #region Broadcast
+    
     private UdpClient _udpBroadcaster;
     private UdpClient _udpBroadcastClient;
     private IPEndPoint _broadcastIpEndPoint;
@@ -24,16 +24,20 @@ public class NetworkManager : MonoBehaviour
     public GameObject MenuItem;
     public GameObject MyIpAddress;
     private IPEndPoint _serverBroadcastEndPoint;
-    private List<NetworkClient> _broadcastList;
+    private List<NetworkServer> _broadcastList;
+
+
     
 
     private void Awake()
     {
         _broadcastSleepTime = 1f;
         _broadcastPort = 13947;
-        _broadcastList = new List<NetworkClient>();
+        _broadcastList = new List<NetworkServer>();
     }
 
+
+    #region Broadcast
     public void StartBroadcasting()
     {
         _isBroadcasting = true;
@@ -93,7 +97,7 @@ public class NetworkManager : MonoBehaviour
 
     public void StopBroadcastClient()
     {
-        foreach (NetworkClient n in _broadcastList)
+        foreach (NetworkServer n in _broadcastList)
         {
             Destroy(n.InstantiatedButton);
         }
@@ -111,17 +115,24 @@ public class NetworkManager : MonoBehaviour
                 NetworkMessage networkMessage = MessagePackSerializer.Deserialize<NetworkMessage>(data);
                 if (_broadcastList.FirstOrDefault(c => c.NetworkMessage.BroadcasterUuid == networkMessage.BroadcasterUuid) == null)
                 {
-                    NetworkClient networkClient = new NetworkClient();
-                    networkClient.NetworkMessage = networkMessage;
-                    networkClient.InstantiatedButtonStartTime = DateTime.Now;
-                    networkClient.InstantiatedButton = Instantiate(MenuItem, ParentMenu.transform);
-                    networkClient.InstantiatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 180 - (90 * _broadcastList.Count - 10), 0);
-                    _broadcastList.Add(networkClient);
+                    NetworkServer networkServer = new NetworkServer();
+                    networkServer.NetworkMessage = networkMessage;
+                    networkServer.InstantiatedButtonStartTime = DateTime.Now;
+                    networkServer.InstantiatedButton = Instantiate(MenuItem, ParentMenu.transform);
+                    networkServer.InstantiatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 180 - (90 * _broadcastList.Count - 10), 0);
+                    _broadcastList.Add(networkServer);
                 }
                 Debug.Log(networkMessage);
             }
             yield return new WaitForSeconds(_broadcastSleepTime);
         }
+    }
+    #endregion
+
+    #region Tcp
+    public void StartTcpServer()
+    {
+
     }
     #endregion
 }

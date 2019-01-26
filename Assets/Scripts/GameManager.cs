@@ -24,13 +24,12 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Initialize()
     {
-        NetworkManager = GetComponent<NetworkManager>();
         yield return StartCoroutine(InitializeNetwork());
     }
     
     private IEnumerator InitializeNetwork()
     {
-        //NetworkManager.StartBroadcasting();
+        NetworkManager = GetComponent<NetworkManager>();
         yield return null;
     }
 }

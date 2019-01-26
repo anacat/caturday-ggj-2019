@@ -204,7 +204,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1184656891}
-        m_MethodName: ShowMenu
+        m_MethodName: JoinIpGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2305,6 +2305,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MainMenu: {fileID: 1837244983}
   Rooms: {fileID: 204993387}
+  Game: {fileID: 848588258}
 --- !u!1 &1204636975
 GameObject:
   m_ObjectHideFlags: 0
