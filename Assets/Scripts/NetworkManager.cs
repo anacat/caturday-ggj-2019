@@ -132,7 +132,7 @@ public class NetworkManager : MonoBehaviour
                     networkServer.NetworkMessage = networkMessage;
                     networkServer.InstantiatedButtonStartTime = DateTime.Now;
                     networkServer.InstantiatedButton = Instantiate(MenuItem, ParentMenu.transform);
-                    networkServer.InstantiatedButton.GetComponent<Button>().onClick.AddListener(() => ConnectToTcpServer(networkMessage));
+                    networkServer.InstantiatedButton.GetComponent<Button>().onClick.AddListener(() => GameManager.Instance.MenuManager.JoinIpGame());
                     networkServer.InstantiatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 180 - (90 * _broadcastList.Count - 10), 0);
                     _broadcastList.Add(networkServer);
                 }
@@ -183,6 +183,12 @@ public class NetworkManager : MonoBehaviour
                     NetworkStream = tcpClientTask.Result.GetStream()
                 };
                 NetworkClientList.Add(networkClient);
+                TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
+                {
+                    ClientUuid = _ownGuid.ToString(),
+                    MessageType = MessageType.HelloFromServer
+                };
+                StartCoroutine(SendTcpClientMessage(tcpNetworkMessage, networkClient.NetworkStream));
             }
             yield return new WaitForSeconds(1);
         }
@@ -214,10 +220,10 @@ public class NetworkManager : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator SendTcpClientMessage(TcpNetworkMessage tcpNetworkMessage)
+    public IEnumerator SendTcpClientMessage(TcpNetworkMessage tcpNetworkMessage, NetworkStream networkStream)
     {
         byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
-        Task.WaitAll(TcpNetworkClientStream.WriteAsync(bytesToSend, 0, bytesToSend.Length));
+        Task.WaitAll(networkStream.WriteAsync(bytesToSend, 0, bytesToSend.Length));
         yield return null;
     }
 
@@ -258,7 +264,7 @@ public class NetworkManager : MonoBehaviour
             };
             TcpNetworkClientStream = TcpNetworkClient.GetStream();
             StartCoroutine(ReceiveTcpServerMessage());
-            SendTcpServerMessage(tcpNetworkMessage);
+            StartCoroutine(SendTcpServerMessage(tcpNetworkMessage));
         }
         else
         {
@@ -267,10 +273,11 @@ public class NetworkManager : MonoBehaviour
         yield return null;
     }
 
-    public void SendTcpServerMessage(TcpNetworkMessage tcpNetworkMessage)
+    public IEnumerator SendTcpServerMessage(TcpNetworkMessage tcpNetworkMessage)
     {
         byte[] bytesToSend = MessagePackSerializer.Serialize(tcpNetworkMessage);
         Task.WaitAll(TcpNetworkClientStream.WriteAsync(bytesToSend,0, bytesToSend.Length));
+        yield return null;
     }
 
     public IEnumerator ReceiveTcpServerMessage()

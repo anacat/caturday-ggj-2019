@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public NetworkManager NetworkManager;
     public NetworkMessageManager NetworkMessageManager;
+    public MenuManager MenuManager;
 
     void Start()
     {
@@ -32,6 +33,7 @@ public class GameManager : MonoBehaviour
     {
         NetworkManager = GetComponent<NetworkManager>();
         NetworkMessageManager = GetComponent<NetworkMessageManager>();
+        MenuManager = GetComponent<MenuManager>();
         yield return null;
     }
 }
