@@ -206,7 +206,7 @@ public class NetworkManager : MonoBehaviour
                     while (c.NetworkStream.DataAvailable);
 
                     TcpNetworkMessage tcpNetworkMessage = MessagePackSerializer.Deserialize<TcpNetworkMessage>(ms.ToArray());
-                    GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage);
+                    GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage, c.Client);
                 }
             }
             yield return new WaitForSeconds(0.1f);
@@ -290,7 +290,7 @@ public class NetworkManager : MonoBehaviour
                 while (TcpNetworkClientStream.DataAvailable);
 
                 TcpNetworkMessage tcpNetworkMessage = MessagePackSerializer.Deserialize<TcpNetworkMessage>(ms.ToArray());
-                GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage);
+                GameManager.Instance.NetworkMessageManager.ProcessTcpNetworkMessage(tcpNetworkMessage, TcpNetworkClient);
             }
             yield return new WaitForSeconds(0.1f);
         }
