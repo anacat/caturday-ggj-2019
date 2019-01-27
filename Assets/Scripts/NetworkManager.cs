@@ -38,14 +38,14 @@ public class NetworkManager : MonoBehaviour
     public ConcurrentBag<NetworkClient> NetworkClientList;
     public TcpClient TcpNetworkClient;
     public NetworkStream TcpNetworkClientStream;
-    private Guid _ownGuid;
+    public Guid OwnGuid;
     private bool _tcpClientIsRunning;
     public readonly static Queue<Action> ExecuteOnMainThread = new Queue<Action>();
     private int _udpClientPort;
 
     private void Awake()
     {
-        _ownGuid = Guid.NewGuid();
+        OwnGuid = Guid.NewGuid();
         _broadcastPort = 13947;
         _tcpPort = 13948;
         _udpClientPort = 13949;
@@ -68,7 +68,7 @@ public class NetworkManager : MonoBehaviour
         _broadcastMessage = new BroadcastMessage()
         {
             BroadcasterIpAddress = GetLocalIPAddress(),
-            BroadcasterUuid = _ownGuid.ToString(),
+            BroadcasterUuid = OwnGuid.ToString(),
             MessageType = MessageType.ServerOn
         };
         _broadcastMessageBytes = MessagePackSerializer.Serialize(_broadcastMessage);
@@ -214,7 +214,7 @@ public class NetworkManager : MonoBehaviour
                 NetworkClientList.Add(networkClient);
                 TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
                 {
-                    ClientUuid = _ownGuid.ToString(),
+                    ClientUuid = OwnGuid.ToString(),
                     MessageType = MessageType.ConnectionAccepted
                 };
                 Thread t = new Thread(new ParameterizedThreadStart(SendTcpClientMessage));
@@ -303,7 +303,7 @@ public class NetworkManager : MonoBehaviour
         {
             TcpNetworkMessage tcpNetworkMessage = new TcpNetworkMessage()
             {
-                ClientUuid = _ownGuid.ToString(),
+                ClientUuid = OwnGuid.ToString(),
                 MessageType = MessageType.Connecting
             };
             TcpNetworkClientStream = TcpNetworkClient.GetStream();
