@@ -54,5 +54,11 @@ public class PlayerController : MonoBehaviour
 
             _timer = 0;
         }
+        else if(other.CompareTag("Fireplace"))
+        {
+            other.GetComponent<Fireplace>().TurnFireplaceOn();
+
+            _timer = 0;
+        }
     }
 }
