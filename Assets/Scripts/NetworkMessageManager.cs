@@ -9,6 +9,7 @@ public class NetworkMessageManager : MonoBehaviour
 {
     public void ProcessTcpNetworkMessage(TcpNetworkMessage message, TcpClient tcpClient)
     {
+        Debug.Log("ProcessTcpNetworkMessage(): " + message.MessageType);
         switch (message.MessageType)
         {
             case MessageType.ConnectionRefused:
@@ -29,9 +30,18 @@ public class NetworkMessageManager : MonoBehaviour
                 GameManager.Instance.NetworkManager.NetworkClientList.FirstOrDefault(
                     c => c.IpAddress == ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString()).ClientUuid = connectingMessage.ClientUuid;
                 GameManager.Instance.NetworkManager.SendTcpServerMessage(connectingMessage);
+                try
+                {
+                    //GameManager.Instance.MenuManager.player = GameObject.Find("Cat");
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log(ex.Message);
+                }
+                
                 break;
             case MessageType.ConnectionAccepted:
-
+                Debug.Log("ProcessTcpNetworkMessage(): " + ex.Message);
                 break;
         }
         NetworkManager.ExecuteOnMainThread.Enqueue(() => { StartCoroutine(ProcessTcpMessageMainThread(message, tcpClient)); });
@@ -39,7 +49,17 @@ public class NetworkMessageManager : MonoBehaviour
 
     private IEnumerator ProcessTcpMessageMainThread(TcpNetworkMessage message, TcpClient tcpClient)
     {
-        Debug.Log(message.MessageType);
+        Debug.Log("ProcessTcpMessageMainThread(): " + message.MessageType);
+        switch (message.MessageType)
+        {
+            case MessageType.Connecting:
+                Debug.Log("ProcessTcpMessageMainThread() / Connecting: ");
+               
+                break;
+            default:
+                break;
+        }
+       
         yield return null;
     }
 

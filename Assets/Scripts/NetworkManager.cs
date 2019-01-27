@@ -393,12 +393,12 @@ public class NetworkManager : MonoBehaviour
     #region Udp Client
     public async void SendUdpServerMessage(NetworkClient networkClient, UdpNetworkMessage udpNetworkMessage)
     {
-
+        await Task.Yield();
     }
     
     public async void ReceiveUdpServerMessage()
     {
-        
+        await Task.Yield();
     }
     #endregion
 }

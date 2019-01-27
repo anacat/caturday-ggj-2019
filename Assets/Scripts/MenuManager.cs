@@ -8,6 +8,7 @@ public class MenuManager : MonoBehaviour
     public GameObject MainMenu;
     public GameObject Rooms;
     public GameObject Game;
+    public GameObject player;
     public GameObject IpAddress;
     private Text _ipAddressText;
 
