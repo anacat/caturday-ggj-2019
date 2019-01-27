@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorOpener : MonoBehaviour
-{    
+{   
+    public Vector3 angle;
+
     private bool _rotate;
-    private Vector3 _rotationVector = new Vector3(0, 0, 90);
+    private Vector3 _rotationVector;
+
+    private void Start()
+    {
+        _rotationVector = angle;
+    }
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            _rotate = true; 
-        }
-
         if(_rotate)
         {
             transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(_rotationVector), Time.deltaTime);

@@ -42,5 +42,17 @@ public class PlayerController : MonoBehaviour
 
             _timer = 0;
         }
+        else if(other.CompareTag("CatLamp"))
+        {
+            other.GetComponent<CatLamp>().ChangeColor();
+
+            _timer = 0;
+        }
+        else if(other.CompareTag("Bath"))
+        {
+            other.GetComponent<BubbleBath>().StartBubbleBath();
+
+            _timer = 0;
+        }
     }
 }
