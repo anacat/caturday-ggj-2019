@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public NetworkManager NetworkManager;
     public NetworkMessageManager NetworkMessageManager;
     public MenuManager MenuManager;
+    public RegisterAssets RegisterAssets;
 
     void Start()
     {
@@ -26,14 +27,10 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Initialize()
     {
-        yield return StartCoroutine(InitializeNetwork());
-    }
-    
-    private IEnumerator InitializeNetwork()
-    {
         NetworkManager = GetComponent<NetworkManager>();
         NetworkMessageManager = GetComponent<NetworkMessageManager>();
         MenuManager = GetComponent<MenuManager>();
+        RegisterAssets = GetComponent<RegisterAssets>();
         yield return null;
     }
 }

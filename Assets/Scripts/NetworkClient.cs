@@ -10,4 +10,5 @@ public class NetworkClient
     public UdpClient UdpClient { get; set; }
     public string IpAddress { get; set; }
     public string ClientUuid { get; set; }
+    public int CatId { get; set; }
 }
