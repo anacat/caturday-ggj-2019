@@ -10,16 +10,40 @@ public class NetworkMessageManager : MonoBehaviour
 {
     public void ProcessTcpNetworkMessage(TcpNetworkMessage message, TcpClient tcpClient)
     {
+        Debug.Log("ProcessTcpNetworkMessage(): " + message.MessageType);
         switch (message.MessageType)
         {
             case MessageType.ConnectionRefused:
                 break;
-            /*case MessageType.Connecting:
+            case MessageType.Connecting:
+                // validate if there is room left. If not, reply ConnectionRefused
+                /*TcpNetworkMessage connectingMessage = new TcpNetworkMessage()
+                {
+                    MessageType = MessageType.ConnectionRefused,
+                    ClientUuid = GameManager.Instance.NetworkManager.OwnGuid.ToString()
+                };*/
+                TcpNetworkMessage connectingMessage = new TcpNetworkMessage()
+                {
+                    MessageType = MessageType.ConnectionAccepted,
+                    ClientUuid = GameManager.Instance.NetworkManager.OwnGuid.ToString(),
+                    AssetList = new List<System.Tuple<int, Vector3, Vector3>>() {new System.Tuple<int, Vector3, Vector3>(0, Vector3.back, Vector3.down) } 
+                };
+                GameManager.Instance.NetworkManager.NetworkClientList.FirstOrDefault(
+                    c => c.IpAddress == ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString()).ClientUuid = connectingMessage.ClientUuid;
+                GameManager.Instance.NetworkManager.SendTcpServerMessage(connectingMessage);
+                try
+                {
+                    //GameManager.Instance.MenuManager.player = GameObject.Find("Cat");
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log(ex.Message);
+                }
                 
                 break;
             case MessageType.ConnectionAccepted:
                 //NetworkManager.ExecuteOnMainThread.Enqueue(() => { StartCoroutine(ProcessTcpMessageMainThread(message, tcpClient)); });
-                break;*/
+                break;
         }
         NetworkManager.ExecuteOnMainThread.Enqueue(() => { StartCoroutine(ProcessTcpMessageMainThread(message, tcpClient)); });
     }
@@ -97,6 +121,7 @@ public class NetworkMessageManager : MonoBehaviour
                 break;
         }
         Debug.Log(message.MessageType);
+>>>>>>> c275a2c4861683a631e694c4368d7933e945306f
         yield return null;
     }
 
