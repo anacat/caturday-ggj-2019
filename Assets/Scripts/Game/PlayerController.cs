@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     private bool _interact;
 
-    private float _interactionCooldown = 2f;
+    private float _interactionCooldown = 1f;
     private float _timer = 0;
 
     private void Update()    
