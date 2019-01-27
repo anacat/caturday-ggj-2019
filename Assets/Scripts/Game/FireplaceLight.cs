@@ -5,8 +5,8 @@ using UnityEngine;
 public class FireplaceLight : MonoBehaviour
 {
     private Light _light;
-    private float _intensitySpeed;
-    private float _rangeSpeed;
+    private float _intensitySpeed = 0.05f;
+    private float _rangeSpeed = 0.025f;
 
     private void Awake()
     {
@@ -15,10 +15,7 @@ public class FireplaceLight : MonoBehaviour
 
     private void Update()
     {
-        _intensitySpeed = Random.Range(0.05f, 0.08f);
-        _rangeSpeed = Random.Range(0.05f, 0.08f);
-
-        _light.intensity = 5 + Mathf.PingPong(Time.time * _intensitySpeed, 1.0f);
-        _light.range = 11 + Mathf.PingPong(Time.time * _rangeSpeed, 1.0f);
+        _light.intensity = 1f + Mathf.PingPong(Time.time * _intensitySpeed, 1.0f);
+        _light.range = 8f + Mathf.PingPong(Time.time * _rangeSpeed, 1.0f);
     }
 }
