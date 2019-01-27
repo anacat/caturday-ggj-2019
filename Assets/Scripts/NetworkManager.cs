@@ -42,6 +42,7 @@ public class NetworkManager : MonoBehaviour
     private bool _tcpClientIsRunning;
     public readonly static Queue<Action> ExecuteOnMainThread = new Queue<Action>();
     private int _udpClientPort;
+    public bool IsReady;
 
     private void Awake()
     {
