@@ -30,72 +30,72 @@ public class NetworkMessageManager : MonoBehaviour
         switch (message.MessageType)
         {
             case MessageType.Connecting:
-                if (GameManager.Instance.NetworkManager.NetworkClientList.Count <= GameManager.Instance.RegisterAssets.Cats.Count)
+            if (GameManager.Instance.NetworkManager.NetworkClientList.Count <= GameManager.Instance.RegisterAssets.Cats.Count)
+            {
+                List<Tuple<Vector3, Quaternion>> assets = new List<Tuple<Vector3, Quaternion>>();
+                int count = GameManager.Instance.RegisterAssets.AssetList.Count;
+                for (int x = 0; x < count; x++)
                 {
-                    List<Tuple<Vector3, Quaternion>> assets = new List<Tuple<Vector3, Quaternion>>();
-                    int count = GameManager.Instance.RegisterAssets.AssetList.Count;
-                    for (int x = 0; x < count; x++)
-                    {
-                        Tuple<Vector3, Quaternion> n =
-                            new Tuple<Vector3, Quaternion>(
-                                GameManager.Instance.RegisterAssets.AssetList[x].transform.position,
-                                GameManager.Instance.RegisterAssets.AssetList[x].transform.rotation);
-                        assets.Add(n);
-                    }
-                    Tuple<Vector3, Quaternion> player = new Tuple<Vector3, Quaternion>(
-                        GameManager.Instance.RegisterAssets.Player.transform.position,
-                        GameManager.Instance.RegisterAssets.Player.transform.rotation);
-                    List<Tuple<Vector3, Quaternion>> cats = new List<Tuple<Vector3, Quaternion>>();
-                    count = GameManager.Instance.RegisterAssets.Cats.Count;
-                    for (int x = 0; x < count; x++)
-                    {
-                        Tuple<Vector3, Quaternion> n =
-                            new Tuple<Vector3, Quaternion>(
-                                GameManager.Instance.RegisterAssets.Cats[x].transform.position,
-                                GameManager.Instance.RegisterAssets.Cats[x].transform.rotation);
-                        cats.Add(n);
-                    }
-                    TcpNetworkMessage connectingMessage = new TcpNetworkMessage()
-                    {
-                        MessageType = MessageType.ConnectionAccepted,
-                        ClientUuid = GameManager.Instance.NetworkManager.OwnGuid.ToString(),
-                        AssetList = assets,
-                        Player = player,
-                        CatList = cats,
-                        DesignatedCat = GameManager.Instance.NetworkManager.NetworkClientList.Count - 1
-                    };
-                    GameManager.Instance.NetworkManager.NetworkClientList.FirstOrDefault(
-                        c => c.IpAddress == ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString()).ClientUuid = connectingMessage.ClientUuid;
-                    GameManager.Instance.NetworkManager.SendTcpServerMessage(connectingMessage);
+                    Tuple<Vector3, Quaternion> n =
+                        new Tuple<Vector3, Quaternion>(
+                            GameManager.Instance.RegisterAssets.AssetList[x].transform.position,
+                            GameManager.Instance.RegisterAssets.AssetList[x].transform.rotation);
+                    assets.Add(n);
                 }
-                else
+                Tuple<Vector3, Quaternion> player = new Tuple<Vector3, Quaternion>(
+                    GameManager.Instance.RegisterAssets.Player.transform.position,
+                    GameManager.Instance.RegisterAssets.Player.transform.rotation);
+                List<Tuple<Vector3, Quaternion>> cats = new List<Tuple<Vector3, Quaternion>>();
+                count = GameManager.Instance.RegisterAssets.Cats.Count;
+                for (int x = 0; x < count; x++)
                 {
-                    TcpNetworkMessage connectingMessage = new TcpNetworkMessage()
-                    {
-                        MessageType = MessageType.ConnectionRefused,
-                        ClientUuid = GameManager.Instance.NetworkManager.OwnGuid.ToString(),
-                    };
-                    GameManager.Instance.NetworkManager.SendTcpServerMessage(connectingMessage);
+                    Tuple<Vector3, Quaternion> n =
+                        new Tuple<Vector3, Quaternion>(
+                            GameManager.Instance.RegisterAssets.Cats[x].transform.position,
+                            GameManager.Instance.RegisterAssets.Cats[x].transform.rotation);
+                    cats.Add(n);
                 }
-                break;
-            case MessageType.ConnectionAccepted:
-                GameManager.Instance.RegisterAssets.Player.transform.position = message.Player.Item1;
-                GameManager.Instance.RegisterAssets.Player.transform.rotation = message.Player.Item2;
-                int assetsCount = GameManager.Instance.RegisterAssets.Cats.Count;
-                for (int x = 0; x < assetsCount; x++)
+                TcpNetworkMessage connectingMessage = new TcpNetworkMessage()
                 {
-                    GameManager.Instance.RegisterAssets.Cats[x].transform.position = message.CatList[x].Item1;
-                    GameManager.Instance.RegisterAssets.Cats[x].transform.rotation = message.CatList[x].Item2;
-                }
-                assetsCount = GameManager.Instance.RegisterAssets.AssetList.Count;
-                for (int x = 0; x < assetsCount; x++)
+                    MessageType = MessageType.ConnectionAccepted,
+                    ClientUuid = GameManager.Instance.NetworkManager.OwnGuid.ToString(),
+                    AssetList = assets,
+                    Player = player,
+                    CatList = cats,
+                    DesignatedCat = GameManager.Instance.NetworkManager.NetworkClientList.Count - 1
+                };
+                GameManager.Instance.NetworkManager.NetworkClientList.FirstOrDefault(
+                    c => c.IpAddress == ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString()).ClientUuid = connectingMessage.ClientUuid;
+                GameManager.Instance.NetworkManager.SendTcpServerMessage(connectingMessage);
+            }
+            else
+            {
+                TcpNetworkMessage connectingMessage = new TcpNetworkMessage()
                 {
-                    GameManager.Instance.RegisterAssets.AssetList[x].transform.position = message.AssetList[x].Item1;
-                    GameManager.Instance.RegisterAssets.AssetList[x].transform.rotation = message.AssetList[x].Item2;
-                }
-                GameManager.Instance.NetworkManager.IsReady = true;
-                GameManager.Instance.MenuManager.Game.SetActive(true);
-                break;
+                    MessageType = MessageType.ConnectionRefused,
+                    ClientUuid = GameManager.Instance.NetworkManager.OwnGuid.ToString(),
+                };
+                GameManager.Instance.NetworkManager.SendTcpServerMessage(connectingMessage);
+            }
+            break;
+        case MessageType.ConnectionAccepted:
+            GameManager.Instance.RegisterAssets.Player.transform.position = message.Player.Item1;
+            GameManager.Instance.RegisterAssets.Player.transform.rotation = message.Player.Item2;
+            int assetsCount = GameManager.Instance.RegisterAssets.Cats.Count;
+            for (int x = 0; x < assetsCount; x++)
+            {
+                GameManager.Instance.RegisterAssets.Cats[x].transform.position = message.CatList[x].Item1;
+                GameManager.Instance.RegisterAssets.Cats[x].transform.rotation = message.CatList[x].Item2;
+            }
+            assetsCount = GameManager.Instance.RegisterAssets.AssetList.Count;
+            for (int x = 0; x < assetsCount; x++)
+            {
+                GameManager.Instance.RegisterAssets.AssetList[x].transform.position = message.AssetList[x].Item1;
+                GameManager.Instance.RegisterAssets.AssetList[x].transform.rotation = message.AssetList[x].Item2;
+            }
+            GameManager.Instance.NetworkManager.IsReady = true;
+            GameManager.Instance.MenuManager.Game.SetActive(true);
+            break;
         }
         yield return null;
     }
