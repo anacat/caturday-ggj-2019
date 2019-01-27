@@ -4,7 +4,14 @@ using UnityEngine;
 
 public enum MessageType
 {
-    HelloWorld,
-    JoinGame,
-    HelloFromServer,
+    None,
+    ServerOn,
+    Connected,
+    Connecting,
+    ConnectionRefused,
+    ConnectionAccepted,
+    ConnectingAuthentication,
+    MovementStarted,
+    MovementNotAllowed,
+    AssetsPositions,
 }
