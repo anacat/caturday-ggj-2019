@@ -12,5 +12,11 @@ public class TcpNetworkMessage
     [Key(1)]
     public string ClientUuid { get; set; }
     [Key(3)]
-    public List<Tuple<int, Vector3, Vector3 >> AssetList { get; set; }
+    public List<Tuple<Vector3, Quaternion >> AssetList { get; set; }
+    [Key(4)]
+    public Tuple<Vector3, Quaternion> Player;
+    [Key(5)]
+    public List<Tuple<Vector3, Quaternion>> CatList { get; set; }
+    [Key(6)]
+    public int DesignatedCat { get; set; }
 }
